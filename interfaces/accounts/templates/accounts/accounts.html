@@ -1,0 +1,45 @@
+{% extends 'interfaces/base.html' %}
+
+{% load static %}
+<!DOCTYPE html>
+
+{% block links %}
+    <link type="text/css" href="{% static 'accounts/css/accounts.css' %}" rel="stylesheet"/>
+{% endblock %}
+
+{% block content %}
+    <h2 class="text-title">Generation projects</h2>
+    <hr>
+    <div class="cards">
+        <div class="white-background input-card card mb-10 pd-10">
+            <div align="center">
+                <audio id="player" controls="controls">
+                    <source id="mp3_src" src="#" type="audio/mp3" />Your browser does not support the audio element.
+                </audio>
+            </div>
+            <form action="" method="post" align="center" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for f in send_generation_form %}
+                <label for="{{ f.id_for_label }}">{{ f.label }}</label>
+                <div class="mb-10">{{ f }}</div>
+                <div class="">{{ f.errors }}</div>
+            {% endfor %}
+            <button type="submit" class="button color form-middle mt-10">Predict</button>
+            </form>
+        </div>
+        {% for voice in voices %}
+        <div class="white-background card mb-10 pd-10">
+            <audio controls="controls">
+                <source src="/media/{{ voice.audio }}" type="audio/mpeg"/>Your browser does not support the audio element.
+            </audio>
+            <hr>
+            <p class="text-description"><b>Text: </b>{{ voice.text }}</p>
+            <p class="text-description"><b>Date: </b>{{ voice.date }}</p>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'accounts/js/accounts.js' %}"></script>
+{% endblock %}
