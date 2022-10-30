@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  generation_api:
+    image: voice_generation
+    ports:
+      - "7861:7861"
+    volumes:
+      - ./:/workspace
+    command: >
+      sh -c "python3 start_api.py"
+    depends_on:
+      - celery-generation
+
+  redis:
+    image: redis:alpine
+  celery-generation:
+    restart: on-failure
+    image: voice_generation
+    command: sh -c "export CUDA_VISIBLE_DEVICES=0 &&
+                    nvidia-smi &&
+                    celery -A api.worker worker -l info"
+    environment:
+      CELERY_WORKER_CONCURRENCY: 1
+      CUDA_VISIBLE_DEVICES: 0
+    volumes:
+      - ./:/workspace
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [ gpu ]
+  flower:
+    image: voice_generation
+    command: celery -A api.worker flower
+    volumes:
+      - ./:/workspace
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - celery-generation
