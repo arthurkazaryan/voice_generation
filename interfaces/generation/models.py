@@ -46,6 +46,10 @@ class AudioFile(models.Model):
         default=uuid.uuid4,
         verbose_name='API task UUID'
     )
+    voice = models.CharField(
+        max_length=32,
+        verbose_name='Voice'
+    )
     audio = models.FileField(
         default='',
         upload_to='generation/audio_created',

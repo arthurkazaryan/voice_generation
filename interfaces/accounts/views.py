@@ -1,9 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, TemplateView
 from django.shortcuts import render
 from accounts.forms import RegistrationForm, LoginForm
@@ -73,3 +74,22 @@ class ProfilePage(DataMixin, TemplateView, LoginRequiredMixin):
         )
 
         return render(request, self.template_name, context=context)
+
+    def post(self, request, *args, **kwargs):
+
+        send_generation_form = SendGenerationForm(request.POST)
+        if send_generation_form.is_valid():
+            data = send_generation_form.cleaned_data
+            if data['select_voice'] != 'none':
+                audio_file = AudioFile(
+                    user=request.user,
+                    voice=data['select_voice'].split(';')[1],
+                    status='PENDING',
+                    text=data['text'],
+                )
+                # audio_file.save()
+                messages.success(request, f'Audiofile has been successfully created.')
+            else:
+                messages.error(request, f'Error occurred while validating forms. Check your input data.')
+
+        return HttpResponseRedirect(reverse('accounts-home'))
