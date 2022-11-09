@@ -1,11 +1,5 @@
 from django.contrib import admin
-from generation.models import AudioSamples, AudioFile
-
-
-@admin.register(AudioSamples)
-class AudioSamplesAdmin(admin.ModelAdmin):
-    list_display = ('title', 'name', 'audio', 'visible')
-    search_fields = ('title',)
+from generation.models import AudioFile
 
 
 @admin.register(AudioFile)

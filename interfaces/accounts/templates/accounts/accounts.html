@@ -12,11 +12,6 @@
     <hr>
     <div class="cards">
         <div class="white-background input-card card mb-10 pd-10">
-            <div align="center">
-                <audio id="player" controls="controls">
-                    <source id="mp3_src" src="#" type="audio/mp3" />Your browser does not support the audio element.
-                </audio>
-            </div>
             <form action="" method="post" align="center" enctype="multipart/form-data">
             {% csrf_token %}
             {% for f in send_generation_form %}
@@ -38,8 +33,4 @@
         </div>
         {% endfor %}
     </div>
-{% endblock %}
-
-{% block script %}
-    <script src="{% static 'accounts/js/accounts.js' %}"></script>
 {% endblock %}

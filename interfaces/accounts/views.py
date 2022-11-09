@@ -83,7 +83,7 @@ class ProfilePage(DataMixin, TemplateView, LoginRequiredMixin):
             if data['select_voice'] != 'none':
                 audio_file = AudioFile(
                     user=request.user,
-                    voice=data['select_voice'].split(';')[1],
+                    voice=data['select_voice'],
                     status='PENDING',
                     text=data['text'],
                 )
