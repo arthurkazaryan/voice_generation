@@ -12,9 +12,17 @@
 
 ## Подготовка окружения
 ```
-cd generation
-docker built -t generation .
+git submodule init
+git submodule update
+docker built -t voice_generation .
 docker-compose up
+
+# DJANGO
+cd interfaces
+pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
 ```
 ## Производительность и необходимое оборудование
 Для инференса подойдет CPU. Ryzen 5600h: ~1200 символов в минуту
