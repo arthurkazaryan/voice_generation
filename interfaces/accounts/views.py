@@ -8,9 +8,16 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, TemplateView
 from django.shortcuts import render
 from accounts.forms import RegistrationForm, LoginForm
+from generation.utils import post_generation, get_generation_audio, get_generation_status
 from interfaces.utils import DataMixin
 from generation.forms import SendGenerationForm
 from generation.models import AudioFile
+from pathlib import Path
+from time import sleep
+import requests
+import uuid
+
+from interfaces_project.settings import MEDIA_ROOT
 
 
 class RegisterUser(DataMixin, CreateView):
@@ -83,12 +90,42 @@ class ProfilePage(DataMixin, TemplateView, LoginRequiredMixin):
             if data['select_voice'] != 'none':
                 audio_file = AudioFile(
                     user=request.user,
-                    voice=data['select_voice'].split(';')[1],
+                    voice=data['select_voice'],
                     status='PENDING',
                     text=data['text'],
                 )
                 # audio_file.save()
-                messages.success(request, f'Audiofile has been successfully created.')
+
+                try:
+                    post_request = post_generation(text=data['text'], voice=data['select_voice'])
+                    api_status = post_request.json()['status']
+                    api_task_id = post_request.json()['task_id']
+
+                    ready = False
+
+                    while not ready:
+                        status = get_generation_status(api_task_id)
+                        status_data = status.json()
+                        audio_file.status = status_data['status']
+                        if 200 <= status.status_code < 300 and status_data['status'] == 'REVOKED':
+                            ready = True
+                            audio_file.save()
+                        elif 200 <= status.status_code < 300 and status_data['status'] == 'SUCCESS':
+                            file_suffix = Path(status_data['result']['file_path']).suffix
+                            target_path = Path('generation', 'audio_created', str(uuid.uuid4()) + file_suffix)
+                            request_file = get_generation_audio(audio_path=status_data['result']['file_path'])
+                            with open(str(MEDIA_ROOT.joinpath(target_path)), 'wb') as target_audio:
+                                target_audio.write(request_file.content)
+                            audio_file.audio = str(target_path)
+                            ready = True
+                        elif status.status_code > 400 or status_data['status'] in ['NOT FOUND', 'FAILED']:
+                            audio_file.save()
+                        sleep(3)
+                    messages.success(request, f'Audiofile has been successfully created.')
+                except:
+                    messages.error(request, f'Error occured when requesting to server.')
+                else:
+                    messages.success(request, f'Audiofile has been successfully created.')
             else:
                 messages.error(request, f'Error occurred while validating forms. Check your input data.')
 

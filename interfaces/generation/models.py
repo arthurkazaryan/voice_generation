@@ -3,34 +3,6 @@ from django.contrib.auth.models import User
 import uuid
 
 
-class AudioSamples(models.Model):
-    title = models.CharField(
-        max_length=128,
-        verbose_name='Пользовательское название'
-    )
-    name = models.CharField(
-        max_length=128,
-        verbose_name='API название'
-    )
-    audio = models.FileField(
-        upload_to='generation/audio_samples',
-        blank=False,
-        editable=True,
-    )
-    visible = models.BooleanField(
-        verbose_name='Показать',
-        default=True,
-        editable=True,
-    )
-
-    def __str__(self):
-        return f"Audiosample {self.name}"
-
-    class Meta:
-        verbose_name = 'Audiosample'
-        verbose_name_plural = 'Audiosamples'
-
-
 class AudioFile(models.Model):
     user = models.ForeignKey(
         User,

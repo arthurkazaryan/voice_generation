@@ -1,16 +1,10 @@
 from django import forms
-from interfaces_project.settings import MEDIA_URL
-from generation.models import AudioSamples
-from settings import DJANGO_HOST, DJANGO_PORT
 
 
 def get_audio_samples():
     samples = [('none', '-- Select a sample --')]
-    audio_samples = AudioSamples.objects.filter(visible=True)
-    if audio_samples.exists():
-        samples.extend(
-            [(f'http://{DJANGO_HOST}:{DJANGO_PORT}{MEDIA_URL}{str(aud_sample.audio)};{aud_sample.name}',
-              aud_sample.title) for aud_sample in audio_samples])
+    for name in ['0', '1', '2', '3', '4', '5', '6']:
+        samples.append((name, name))
     return samples
 
 
